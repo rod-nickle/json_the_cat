@@ -1,22 +1,27 @@
 const needle = require('needle');
 
-// First argument to the module is the cat breed.
-const args = process.argv.slice(2);
-const url = 'https://api.thecatapi.com/v1/breeds/search?q=' + args[0];
+const fetchBreedDescription = function(breedName, callback) {
+  const url = 'https://api.thecatapi.com/v1/breeds/search?q=' + breedName;
 
-needle.get((url), (error, response, body) => {
-  if (error) {
-    console.log(`There was an error with this request:\n"${error}"`);
-    return;
-  }
+  needle.get((url), (error, response, body) => {
+    // There was an error in the API request.
+    if (error) {
+      callback(error, null);
+      return;
+    }
+  
+    // The breed was was not found.
+    if (!body[0]) {
+      callback(null, `The breed "${breedName}" was not found.`);
+      return;
+    }
+    
+       // The breed was found.  Return the description.
+    callback(null, body[0].description);
+  });
+};
 
-  if (!body[0]) {
-    console.log(`The breed "${args[0]}" was not found.`);
-  } else {
-    console.log(body[0].description);
-  }
-});
-
+module.exports = { fetchBreedDescription };
 
 
 
